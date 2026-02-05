@@ -41,7 +41,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-muted-foreground text-sm">{user?.name}</span>
+            <Link
+              to="/users/$userId"
+              params={{ userId: user?.id ?? '' }}
+              className="text-muted-foreground hover:text-foreground text-sm"
+            >
+              {user?.name}
+            </Link>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               {t('navigation.logout')}
             </Button>
