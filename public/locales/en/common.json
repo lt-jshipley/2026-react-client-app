@@ -1,0 +1,21 @@
+{
+  "appName": "My Application",
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Page not found",
+    "unauthorized": "You are not authorized to view this page"
+  }
+}

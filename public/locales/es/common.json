@@ -1,0 +1,21 @@
+{
+  "appName": "Mi Aplicación",
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando..."
+  },
+  "errors": {
+    "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+    "notFound": "Página no encontrada",
+    "unauthorized": "No tienes autorización para ver esta página"
+  }
+}

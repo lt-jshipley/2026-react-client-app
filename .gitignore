@@ -1,0 +1,33 @@
+node_modules
+dist
+dist-ssr
+
+# Environment files (commit .env.example only)
+.env
+.env.local
+.env.development
+.env.production
+.env.sentry-build-plugin
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+playwright-report
+test-results
+
+# Build/Cache
+*.tsbuildinfo
+*.local
+
+# Sentry
+.sentryclirc
