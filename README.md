@@ -138,7 +138,7 @@ The app runs at **http://localhost:3000**. The dev server proxies `/api` request
 MSW (Mock Service Worker) can intercept API requests with mock data:
 
 ```bash
-VITE_MSW=true pnpm dev
+pnpm dev:mock
 ```
 
 ## Available Scripts
@@ -146,6 +146,7 @@ VITE_MSW=true pnpm dev
 | Command              | Description                            |
 | -------------------- | -------------------------------------- |
 | `pnpm dev`           | Start dev server on port 3000          |
+| `pnpm dev:mock`      | Start dev server with MSW mock API     |
 | `pnpm build`         | Type-check and build for production    |
 | `pnpm preview`       | Preview the production build locally   |
 | `pnpm type-check`    | Run TypeScript type checking (no emit) |
