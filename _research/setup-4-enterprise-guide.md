@@ -186,7 +186,7 @@ pnpm add react-helmet-async
 # Dev Dependencies
 pnpm add -D typescript @types/react @types/react-dom @types/node \
   vite @vitejs/plugin-react \
-  @tanstack/router-plugin @tanstack/router-devtools \
+  @tanstack/router-plugin @tanstack/react-router-devtools \
   @tanstack/react-query-devtools
 
 # Testing
@@ -518,7 +518,7 @@ ReactDOM.createRoot(rootElement).render(
 // src/routes/__root.tsx
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { QueryClient } from '@tanstack/react-query'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { HelmetProvider } from 'react-helmet-async'
 import * as Sentry from '@sentry/react'
@@ -1323,7 +1323,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { loginSchema, type LoginFormData } from '@/lib/validators/auth'
 
 interface LoginFormProps {
-  onSubmit: (data: LoginFormData) => Promise<void>
+  onSubmit: (data: LoginFormData) => void | Promise<void>
   isLoading?: boolean
 }
 
@@ -1406,6 +1406,75 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
   )
 }
 ```
+
+### Login Route with Error Handling
+
+```typescript
+// src/routes/_public/login.tsx
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoginForm } from '@/components/forms/LoginForm'
+import { useLogin } from '@/api/mutations/auth'
+import { ApiError } from '@/api/client'
+
+export const Route = createFileRoute('/_public/login')({
+  component: LoginPage,
+})
+
+function LoginPage() {
+  const { t } = useTranslation('auth')
+  const navigate = useNavigate()
+  const login = useLogin()
+
+  // Use mutate() with onSuccess callback — not mutateAsync with try/catch.
+  // This is the idiomatic TanStack Query pattern: the mutation's error state
+  // is automatically tracked via login.error, and navigation only fires on success.
+  const handleSubmit = (data: { email: string; password: string }) => {
+    login.mutate(data, {
+      onSuccess: () => {
+        void navigate({ to: '/dashboard' })
+      },
+    })
+  }
+
+  function getErrorMessage(error: Error): string {
+    if (
+      error instanceof ApiError &&
+      error.data != null &&
+      typeof error.data === 'object' &&
+      'message' in error.data
+    ) {
+      return (error.data as { message: string }).message
+    }
+    return t('loginFailed')
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>{t('signIn')}</CardTitle>
+          <CardDescription>{t('emailPlaceholder')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {login.error && (
+            <div
+              role="alert"
+              className="bg-destructive/10 text-destructive border-destructive/20 mb-4 rounded-md border px-4 py-3 text-sm"
+            >
+              {getErrorMessage(login.error)}
+            </div>
+          )}
+          <LoginForm onSubmit={handleSubmit} isLoading={login.isPending} />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+```
+
+> **Pattern:** Prefer `mutate()` with an `onSuccess` callback over `mutateAsync` with `try/catch`. With `mutate()`, TanStack Query automatically populates `mutation.error` on failure, so you can render error UI declaratively via `login.error` without manual state management. The `ApiError` class (from `src/api/client.ts`) carries the HTTP status and parsed response body for structured error messages.
 
 ---
 
@@ -1525,7 +1594,8 @@ declare module 'i18next' {
   "rememberMe": "Remember me",
   "forgotPassword": "Forgot password?",
   "noAccount": "Don't have an account?",
-  "hasAccount": "Already have an account?"
+  "hasAccount": "Already have an account?",
+  "loginFailed": "Unable to sign in. Please check your credentials and try again."
 }
 ```
 
@@ -1738,6 +1808,7 @@ void testI18n.use(initReactI18next).init({
         forgotPassword: 'Forgot password?',
         noAccount: "Don't have an account?",
         hasAccount: 'Already have an account?',
+        loginFailed: 'Unable to sign in. Please check your credentials and try again.',
       },
       dashboard: { pageTitle: 'Dashboard', welcome: 'Welcome back' },
       validation: {},
@@ -1813,11 +1884,67 @@ export const handlers = [
     )
   }),
 
+  http.post(`${API_URL}/auth/register`, async ({ request }) => {
+    const body = (await request.json()) as {
+      name: string
+      email: string
+      password: string
+    }
+
+    if (!body.name || !body.email || !body.password) {
+      return HttpResponse.json(
+        { message: 'All fields are required' },
+        { status: 400 }
+      )
+    }
+
+    return HttpResponse.json({
+      token: 'mock-jwt-token',
+      user: { id: '1', name: body.name, email: body.email },
+    })
+  }),
+
+  // Dashboard handlers
+  http.get(`${API_URL}/dashboard`, () => {
+    return HttpResponse.json({
+      totalUsers: 42,
+      totalPosts: 128,
+      recentActivity: [
+        {
+          id: '1',
+          type: 'user_registered',
+          description: 'New user registered',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          type: 'post_created',
+          description: 'New post published',
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    })
+  }),
+
   // User handlers
   http.get(`${API_URL}/users`, () => {
     return HttpResponse.json([
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-      { id: '2', name: 'Jane Doe', email: 'jane@example.com' },
+      {
+        id: '1',
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'admin',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      },
+      {
+        id: '2',
+        name: 'Jane Doe',
+        email: 'jane@example.com',
+        role: 'user',
+        createdAt: '2025-01-15T00:00:00.000Z',
+        updatedAt: '2025-01-15T00:00:00.000Z',
+      },
     ])
   }),
 
@@ -1826,7 +1953,73 @@ export const handlers = [
       id: params.id,
       name: 'John Doe',
       email: 'john@example.com',
+      role: 'admin',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z',
     })
+  }),
+
+  http.get(`${API_URL}/users/:userId/posts`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: '1',
+        title: 'First Post',
+        content: 'This is the first post content.',
+        authorId: params.userId as string,
+        createdAt: '2025-02-01T00:00:00.000Z',
+        updatedAt: '2025-02-01T00:00:00.000Z',
+      },
+      {
+        id: '2',
+        title: 'Second Post',
+        content: 'This is the second post content.',
+        authorId: params.userId as string,
+        createdAt: '2025-02-10T00:00:00.000Z',
+        updatedAt: '2025-02-10T00:00:00.000Z',
+      },
+    ])
+  }),
+
+  http.post(`${API_URL}/users`, async ({ request }) => {
+    const body = (await request.json()) as {
+      name: string
+      email: string
+      password: string
+      role?: 'admin' | 'user'
+    }
+
+    return HttpResponse.json(
+      {
+        id: '3',
+        name: body.name,
+        email: body.email,
+        role: body.role ?? 'user',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      { status: 201 }
+    )
+  }),
+
+  http.put(`${API_URL}/users/:id`, async ({ params, request }) => {
+    const body = (await request.json()) as {
+      name?: string
+      email?: string
+      role?: 'admin' | 'user'
+    }
+
+    return HttpResponse.json({
+      id: params.id,
+      name: body.name ?? 'John Doe',
+      email: body.email ?? 'john@example.com',
+      role: body.role ?? 'admin',
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: new Date().toISOString(),
+    })
+  }),
+
+  http.delete(`${API_URL}/users/:id`, () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 ]
 ```
@@ -1876,7 +2069,7 @@ void enableMocking().then(() => {
 })
 ```
 
-> **Usage:** Run `VITE_MSW=true pnpm dev` to enable dev-mode mocking. This is useful when the backend API is unavailable.
+> **Usage:** Run `pnpm dev:mock` (or `VITE_MSW=true pnpm dev`) to enable dev-mode mocking. This is useful when the backend API is unavailable.
 
 ### Component Test Example
 
@@ -2365,6 +2558,9 @@ coverage
 playwright-report
 test-results
 
+# MSW (generated service worker)
+public/mockServiceWorker.js
+
 # Build/Cache
 *.tsbuildinfo
 *.local
@@ -2426,6 +2622,7 @@ interface ImportMeta {
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_MSW=true vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -2470,7 +2667,7 @@ interface ImportMeta {
     "vite": "^7.x",
     "@vitejs/plugin-react": "^4.x",
     "@tanstack/router-plugin": "^1.x",
-    "@tanstack/router-devtools": "^1.x",
+    "@tanstack/react-router-devtools": "^1.x",
     "@tanstack/react-query-devtools": "^5.x",
     "tailwindcss": "^4.x",
     "@tailwindcss/vite": "^4.x",
@@ -2497,6 +2694,9 @@ interface ImportMeta {
     "@commitlint/config-conventional": "^19.x",
     "@sentry/vite-plugin": "^3.x"
   },
+  "msw": {
+    "workerDirectory": ["public"]
+  },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild", "msw", "@sentry/cli"]
   },
@@ -2522,14 +2722,16 @@ interface ImportMeta {
 | `throw redirect()` lint error | `redirect()` is not an Error subclass but is designed to be thrown. Add `// eslint-disable-next-line @typescript-eslint/only-throw-error` |
 | Auth redirects not working    | Use `throw redirect()` in `beforeLoad`, not return                                                                                        |
 | Data not updating             | Always use `useSuspenseQuery` in components, not just loader                                                                              |
+| Deprecated devtools package   | Use `@tanstack/react-router-devtools`, not `@tanstack/router-devtools` (deprecated wrapper)                                               |
 
 ### TanStack Query
 
-| Gotcha                            | Solution                                           |
-| --------------------------------- | -------------------------------------------------- |
-| `ensureQueryData` never refetches | It only seeds cache; always subscribe with hooks   |
-| Request waterfalls                | Use `Promise.all()` for parallel fetches in loader |
-| Stale data after mutation         | Call `invalidateQueries` in mutation's `onSuccess` |
+| Gotcha                            | Solution                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ensureQueryData` never refetches | It only seeds cache; always subscribe with hooks                                                              |
+| Request waterfalls                | Use `Promise.all()` for parallel fetches in loader                                                            |
+| Stale data after mutation         | Call `invalidateQueries` in mutation's `onSuccess`                                                            |
+| `mutateAsync` swallows errors     | Prefer `mutate()` with `onSuccess` callback for navigation/side-effects; avoids needing try/catch boilerplate |
 
 ### Zustand
 
@@ -2554,6 +2756,7 @@ interface ImportMeta {
 | `exactOptionalPropertyTypes` incompatible | Disable this tsconfig option — RHF + zod resolver types have `boolean \| undefined` vs `boolean` mismatches         |
 | `handleSubmit` passes 2 args              | `onSubmit` receives `(data, event)` — account for the SyntheticEvent in tests with `expect.anything()`              |
 | Mock onSubmit not called                  | If `onSubmit` returns `Promise<void>`, mock must also return a Promise: `mockOnSubmit.mockResolvedValue(undefined)` |
+| `onSubmit` type too strict                | Use `void \| Promise<void>` return type to support both sync (`mutate`) and async (`mutateAsync`) callers           |
 
 ### Tailwind v4
 
