@@ -203,13 +203,37 @@ Git hooks are configured via Husky and run automatically:
 - **Pre-commit:** lint-staged runs ESLint + Prettier on staged files
 - **Commit message:** commitlint enforces [Conventional Commits](https://www.conventionalcommits.org/) format
 
+### Commit message format
+
 ```
 type(scope): subject
+```
 
-# Examples:
+The scope is optional. The subject must be **lower-case** and **72 characters or fewer**.
+
+### Allowed commit types
+
+| Type       | What it means                                           |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | A new feature or user-facing capability                 |
+| `fix`      | A bug fix                                               |
+| `docs`     | Documentation-only changes                              |
+| `style`    | Code style changes (formatting, whitespace — not CSS)   |
+| `refactor` | Code changes that neither fix a bug nor add a feature   |
+| `perf`     | A change that improves performance                      |
+| `test`     | Adding or updating tests                                |
+| `chore`    | Build process, dependency updates, or other maintenance |
+| `ci`       | Changes to CI/CD configuration or scripts               |
+| `revert`   | Reverts a previous commit                               |
+
+### Examples
+
+```
 feat(auth): add jwt token refresh mechanism
 fix(api): resolve race condition in data fetching
 docs(readme): update installation instructions
+chore: update dependencies
+test(login): add missing unit tests for validation
 ```
 
 ## State Management
