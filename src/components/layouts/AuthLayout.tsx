@@ -4,11 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useUIStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { AppSidebar } from './AppSidebar'
 
@@ -36,7 +32,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         user={user}
         onLogout={handleLogout}
       />
-      <SidebarInset>
+      <div className="flex min-h-svh flex-1 flex-col">
         <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
@@ -56,8 +52,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             </Button>
           </div>
         </header>
-        <main>{children}</main>
-      </SidebarInset>
+        <main className="flex-1">{children}</main>
+      </div>
     </SidebarProvider>
   )
 }

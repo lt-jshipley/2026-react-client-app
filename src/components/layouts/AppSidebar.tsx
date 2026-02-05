@@ -70,7 +70,7 @@ export function AppSidebar({
   const items = navVariant === 'public' ? publicNav : authNav
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
