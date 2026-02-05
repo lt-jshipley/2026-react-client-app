@@ -1,0 +1,6 @@
+{
+  "pageTitle": "{{name}}'s Profile",
+  "postsHeading": "Posts ({{count}})",
+  "noPosts": "No posts yet.",
+  "publishedOn": "Published on {{date}}"
+}

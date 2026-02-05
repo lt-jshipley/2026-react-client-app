@@ -11,7 +11,7 @@ const testI18n = i18n.createInstance()
 void testI18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['common', 'auth', 'dashboard', 'settings', 'validation'],
+  ns: ['common', 'auth', 'dashboard', 'settings', 'users', 'validation'],
   defaultNS: 'common',
   interpolation: {
     escapeValue: false,
@@ -69,6 +69,12 @@ void testI18n.use(initReactI18next).init({
           updateSuccess: 'Your profile has been updated.',
           updateFailed: 'Unable to update profile. Please try again.',
         },
+      },
+      users: {
+        pageTitle: "{{name}}'s Profile",
+        postsHeading: 'Posts ({{count}})',
+        noPosts: 'No posts yet.',
+        publishedOn: 'Published on {{date}}',
       },
       validation: {
         required: 'This field is required',

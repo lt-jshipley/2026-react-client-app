@@ -5,6 +5,7 @@ import type common from '../../public/locales/en/common.json'
 import type auth from '../../public/locales/en/auth.json'
 import type dashboard from '../../public/locales/en/dashboard.json'
 import type settings from '../../public/locales/en/settings.json'
+import type users from '../../public/locales/en/users.json'
 import type validation from '../../public/locales/en/validation.json'
 
 declare module 'i18next' {
@@ -15,6 +16,7 @@ declare module 'i18next' {
       auth: typeof auth
       dashboard: typeof dashboard
       settings: typeof settings
+      users: typeof users
       validation: typeof validation
     }
   }
