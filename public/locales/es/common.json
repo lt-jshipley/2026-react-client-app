@@ -4,6 +4,8 @@
     "home": "Inicio",
     "dashboard": "Panel",
     "settings": "Configuración",
+    "users": "Usuarios",
+    "admin": "Administrador",
     "logout": "Cerrar sesión"
   },
   "actions": {

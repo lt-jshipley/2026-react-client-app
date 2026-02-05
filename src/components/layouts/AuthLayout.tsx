@@ -2,7 +2,15 @@ import type { ReactNode } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useUIStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { AppSidebar } from './AppSidebar'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -13,6 +21,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen)
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen)
 
   const handleLogout = () => {
     logout()
@@ -20,37 +30,18 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b">
-        <nav className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/dashboard" className="text-lg font-semibold">
-              {t('appName')}
-            </Link>
-            <Link
-              to="/dashboard"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.dashboard')}
-            </Link>
-            <Link
-              to="/settings"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.settings')}
-            </Link>
-            <Link
-              to="/users"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.users')}
-            </Link>
-            <Link
-              to="/admin/users"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.admin')}
-            </Link>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <AppSidebar
+        navVariant="authenticated"
+        user={user}
+        onLogout={handleLogout}
+      />
+      <SidebarInset>
+        <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <span className="text-sm font-semibold">{t('appName')}</span>
           </div>
           <div className="flex items-center gap-4">
             <Link
@@ -64,9 +55,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               {t('navigation.logout')}
             </Button>
           </div>
-        </nav>
-      </header>
-      <main>{children}</main>
-    </div>
+        </header>
+        <main>{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

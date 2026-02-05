@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react'
-import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { useUIStore } from '@/stores/uiStore'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { AppSidebar } from './AppSidebar'
 
 interface RootLayoutProps {
   children: ReactNode
@@ -8,35 +15,20 @@ interface RootLayoutProps {
 
 export function RootLayout({ children }: RootLayoutProps) {
   const { t } = useTranslation('common')
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen)
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen)
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b">
-        <nav className="container flex h-16 items-center gap-6">
-          <Link to="/" className="text-lg font-semibold">
-            {t('appName')}
-          </Link>
-          <Link
-            to="/dashboard"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('navigation.dashboard')}
-          </Link>
-          <Link
-            to="/settings"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('navigation.settings')}
-          </Link>
-          <Link
-            to="/users"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('navigation.users')}
-          </Link>
-        </nav>
-      </header>
-      <main>{children}</main>
-    </div>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <AppSidebar navVariant="public" />
+      <SidebarInset>
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <span className="text-sm font-semibold">{t('appName')}</span>
+        </header>
+        <main>{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

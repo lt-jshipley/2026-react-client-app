@@ -2,9 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
 import { usersQueryOptions } from '@/api/queries/users'
-import { RootLayout } from '@/components/layouts/RootLayout'
 
-export const Route = createFileRoute('/users/')({
+export const Route = createFileRoute('/_public/users/')({
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(usersQueryOptions),
   component: UsersPage,
@@ -14,7 +13,7 @@ function UsersPage() {
   const { data: users } = useSuspenseQuery(usersQueryOptions)
 
   return (
-    <RootLayout>
+    <>
       <Helmet>
         <title>Users | App Name</title>
       </Helmet>
@@ -35,6 +34,6 @@ function UsersPage() {
           ))}
         </div>
       </div>
-    </RootLayout>
+    </>
   )
 }

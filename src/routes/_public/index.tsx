@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Helmet } from 'react-helmet-async'
-import { RootLayout } from '@/components/layouts/RootLayout'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_public/')({
   component: HomePage,
 })
 
@@ -11,7 +10,7 @@ function HomePage() {
   const { t } = useTranslation('common')
 
   return (
-    <RootLayout>
+    <>
       <Helmet>
         <title>{t('appName')}</title>
       </Helmet>
@@ -27,6 +26,6 @@ function HomePage() {
           </Link>
         </div>
       </div>
-    </RootLayout>
+    </>
   )
 }
