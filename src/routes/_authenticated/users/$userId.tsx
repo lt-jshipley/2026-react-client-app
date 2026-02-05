@@ -3,10 +3,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Helmet } from 'react-helmet-async'
 import { userQueryOptions, userPostsQueryOptions } from '@/api/queries/users'
-import { RootLayout } from '@/components/layouts/RootLayout'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-export const Route = createFileRoute('/users/$userId')({
+export const Route = createFileRoute('/_authenticated/users/$userId')({
   loader: ({ params, context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(userQueryOptions(params.userId)),
@@ -22,7 +21,7 @@ function UserPage() {
   const { data: posts } = useSuspenseQuery(userPostsQueryOptions(userId))
 
   return (
-    <RootLayout>
+    <>
       <Helmet>
         <title>{user.name} | App Name</title>
       </Helmet>
@@ -58,6 +57,6 @@ function UserPage() {
           )}
         </section>
       </div>
-    </RootLayout>
+    </>
   )
 }
