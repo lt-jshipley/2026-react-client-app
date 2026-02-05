@@ -4,6 +4,7 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "settings": "Settings",
+    "users": "Users",
     "logout": "Log out"
   },
   "actions": {

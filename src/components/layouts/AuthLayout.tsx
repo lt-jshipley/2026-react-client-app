@@ -39,6 +39,12 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             >
               {t('navigation.settings')}
             </Link>
+            <Link
+              to="/users"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t('navigation.users')}
+            </Link>
           </div>
           <div className="flex items-center gap-4">
             <Link

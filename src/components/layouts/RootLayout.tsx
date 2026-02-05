@@ -28,6 +28,12 @@ export function RootLayout({ children }: RootLayoutProps) {
           >
             {t('navigation.settings')}
           </Link>
+          <Link
+            to="/users"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {t('navigation.users')}
+          </Link>
         </nav>
       </header>
       <main>{children}</main>
