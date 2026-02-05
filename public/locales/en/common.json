@@ -5,6 +5,7 @@
     "dashboard": "Dashboard",
     "settings": "Settings",
     "users": "Users",
+    "admin": "Admin",
     "logout": "Log out"
   },
   "actions": {

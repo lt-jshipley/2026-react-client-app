@@ -17,7 +17,7 @@ void i18n
     },
 
     // Namespace configuration
-    ns: ['common', 'auth', 'dashboard', 'settings', 'validation'],
+    ns: ['common', 'auth', 'dashboard', 'settings', 'users', 'validation'],
     defaultNS: 'common',
 
     // Backend configuration

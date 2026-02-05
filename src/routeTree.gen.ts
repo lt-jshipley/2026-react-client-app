@@ -19,6 +19,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedUsersUserIdRouteImport } from './routes/_authenticated/users/$userId'
 import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_authenticated/settings/profile'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 
 const PublicRouteRoute = PublicRouteRouteImport.update({
   id: '/_public',
@@ -71,6 +72,11 @@ const AuthenticatedSettingsProfileRoute =
     path: '/settings/profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof PublicLoginRoute
   '/register': typeof PublicRegisterRoute
   '/users/': typeof UsersIndexRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLoginRoute
   '/register': typeof PublicRegisterRoute
   '/users': typeof UsersIndexRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_public/login': typeof PublicLoginRoute
   '/_public/register': typeof PublicRegisterRoute
   '/users/': typeof UsersIndexRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileRoute
   '/_authenticated/users/$userId': typeof AuthenticatedUsersUserIdRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/users/'
+    | '/admin/users'
     | '/settings/profile'
     | '/users/$userId'
     | '/settings/'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/users'
+    | '/admin/users'
     | '/settings/profile'
     | '/users/$userId'
     | '/settings'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_public/login'
     | '/_public/register'
     | '/users/'
+    | '/_authenticated/admin/users'
     | '/_authenticated/settings/profile'
     | '/_authenticated/users/$userId'
     | '/_authenticated/settings/'
@@ -219,11 +231,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedSettingsProfileRoute: typeof AuthenticatedSettingsProfileRoute
   AuthenticatedUsersUserIdRoute: typeof AuthenticatedUsersUserIdRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
@@ -231,6 +251,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedSettingsProfileRoute: AuthenticatedSettingsProfileRoute,
   AuthenticatedUsersUserIdRoute: AuthenticatedUsersUserIdRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
