@@ -21,13 +21,12 @@ function LoginPage() {
   const navigate = useNavigate()
   const login = useLogin()
 
-  const handleSubmit = async (data: { email: string; password: string }) => {
-    try {
-      await login.mutateAsync(data)
-      void navigate({ to: '/dashboard' })
-    } catch {
-      // Error is captured by mutation state and displayed in the form
-    }
+  const handleSubmit = (data: { email: string; password: string }) => {
+    login.mutate(data, {
+      onSuccess: () => {
+        void navigate({ to: '/dashboard' })
+      },
+    })
   }
 
   function getErrorMessage(error: Error): string {

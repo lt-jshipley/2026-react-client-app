@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { loginSchema, type LoginFormData } from '@/lib/validators/auth'
 
 interface LoginFormProps {
-  onSubmit: (data: LoginFormData) => Promise<void>
+  onSubmit: (data: LoginFormData) => void | Promise<void>
   isLoading?: boolean
 }
 
