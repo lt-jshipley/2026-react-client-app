@@ -23,7 +23,7 @@ export function RootLayout({ children }: RootLayoutProps) {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <span className="text-sm font-semibold">{t('appName')}</span>
         </header>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 p-6">{children}</main>
       </div>
     </SidebarProvider>
   )
