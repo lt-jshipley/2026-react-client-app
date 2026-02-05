@@ -29,3 +29,16 @@ export const updateUserSchema = z.object({
 })
 
 export type UpdateUserFormData = z.infer<typeof updateUserSchema>
+
+export const profileSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .min(2, { message: 'Name must be at least 2 characters' })
+    .max(50, { message: 'Name must be under 50 characters' }),
+  email: z
+    .email({ error: 'Invalid email address' })
+    .min(1, { message: 'Email is required' }),
+})
+
+export type ProfileFormData = z.infer<typeof profileSchema>

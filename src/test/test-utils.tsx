@@ -11,7 +11,7 @@ const testI18n = i18n.createInstance()
 void testI18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['common', 'auth', 'dashboard', 'validation'],
+  ns: ['common', 'auth', 'dashboard', 'settings', 'validation'],
   defaultNS: 'common',
   interpolation: {
     escapeValue: false,
@@ -55,6 +55,20 @@ void testI18n.use(initReactI18next).init({
       dashboard: {
         pageTitle: 'Dashboard',
         welcome: 'Welcome to your dashboard',
+      },
+      settings: {
+        profile: {
+          pageTitle: 'Profile Settings',
+          pageDescription: 'Manage your profile information',
+          name: 'Name',
+          namePlaceholder: 'Enter your name',
+          email: 'Email',
+          emailPlaceholder: 'Enter your email',
+          saveChanges: 'Save Changes',
+          saving: 'Saving...',
+          updateSuccess: 'Your profile has been updated.',
+          updateFailed: 'Unable to update profile. Please try again.',
+        },
       },
       validation: {
         required: 'This field is required',

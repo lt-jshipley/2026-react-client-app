@@ -1,0 +1,14 @@
+{
+  "profile": {
+    "pageTitle": "Profile Settings",
+    "pageDescription": "Manage your profile information",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateSuccess": "Your profile has been updated.",
+    "updateFailed": "Unable to update profile. Please try again."
+  }
+}

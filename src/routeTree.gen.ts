@@ -248,7 +248,7 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
-  PublicRouteRouteChildren
+  PublicRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
