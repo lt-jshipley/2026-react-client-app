@@ -125,7 +125,17 @@ cp .env.example .env.development
 | `VITE_SENTRY_DSN`  | Sentry DSN (production only)    | —                           |
 | `VITE_APP_VERSION` | App version for Sentry releases | `dev`                       |
 
-### 3. Start the dev server
+### 3. Initialize MSW (Mock Service Worker)
+
+Generate the service worker script used to intercept API requests during development and testing:
+
+```bash
+pnpm msw init public/ --save
+```
+
+This creates `public/mockServiceWorker.js`. The file is gitignored and must be regenerated after a fresh clone.
+
+### 4. Start the dev server
 
 ```bash
 pnpm dev
@@ -133,9 +143,9 @@ pnpm dev
 
 The app runs at **http://localhost:3000**. The dev server proxies `/api` requests to `https://localhost:5001`.
 
-### 4. (Optional) Run without a backend
+### 5. (Optional) Run without a backend
 
-MSW (Mock Service Worker) can intercept API requests with mock data:
+MSW can intercept API requests with mock data so you can develop without a running backend:
 
 ```bash
 pnpm dev:mock

@@ -25,6 +25,9 @@ coverage
 playwright-report
 test-results
 
+# MSW (generated service worker)
+public/mockServiceWorker.js
+
 # Build/Cache
 *.tsbuildinfo
 *.local
