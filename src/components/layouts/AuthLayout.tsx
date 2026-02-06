@@ -6,6 +6,7 @@ import { useUIStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle'
 import { AppSidebar } from './AppSidebar'
 
 interface AuthLayoutProps {
@@ -40,6 +41,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             <span className="text-sm font-semibold">{t('appName')}</span>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Link
               to="/users/$userId"
               params={{ userId: user?.id ?? '' }}

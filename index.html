@@ -5,6 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>my-app</title>
+    <script>
+      ;(function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem('ui-storage') || '{}')
+          var theme = stored.state && stored.state.theme
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark')
+          } else if (theme === 'system' || !theme) {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              document.documentElement.classList.add('dark')
+            }
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
