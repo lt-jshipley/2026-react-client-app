@@ -15,9 +15,9 @@
 5. [TypeScript Configuration](#typescript-configuration)
 6. [TanStack Router](#tanstack-router)
 7. [TanStack Query](#tanstack-query)
-8. [Tailwind CSS + shadcn/ui](#tailwind-css--shadcnui) (includes layout components)
-9. [Zustand State Management](#zustand-state-management)
-10. [React Hook Form + Zod](#react-hook-form--zod)
+8. [Tailwind CSS + shadcn/ui](#tailwind-css--shadcnui) (includes sidebar, layout components)
+9. [Zustand State Management](#zustand-state-management) (includes theme toggle, locale switching, FOUC prevention)
+10. [React Hook Form + Zod](#react-hook-form--zod) (includes profile form, user validators)
 11. [Internationalization (i18n)](#internationalization-i18n)
 12. [TypeScript Types](#typescript-types)
 13. [Testing Stack](#testing-stack) (includes MSW browser handler)
@@ -58,52 +58,81 @@ project-root/
 │   └── locales/                    # Translation files
 │       ├── en/
 │       │   ├── common.json
-│       │   ├── navigation.json
+│       │   ├── auth.json
+│       │   ├── dashboard.json
+│       │   ├── settings.json
+│       │   ├── users.json
 │       │   └── validation.json
 │       └── es/
-│           └── ...
+│           └── ...                 # Same namespaces, Spanish translations
 ├── src/
 │   ├── routes/                     # TanStack Router file-based routes
 │   │   ├── __root.tsx              # Root layout (required)
-│   │   ├── index.tsx               # Home route (/)
 │   │   ├── _authenticated/         # Auth-required routes (layout group)
 │   │   │   ├── route.tsx           # Auth layout with guard
 │   │   │   ├── dashboard.tsx       # /dashboard
+│   │   │   ├── admin/
+│   │   │   │   └── users.tsx       # /admin/users (CRUD management)
+│   │   │   ├── users/
+│   │   │   │   └── $userId.tsx     # /users/:userId (with posts)
 │   │   │   └── settings/
 │   │   │       ├── index.tsx       # /settings
 │   │   │       └── profile.tsx     # /settings/profile
-│   │   ├── _public/                # Public routes (layout group)
-│   │   │   ├── route.tsx           # Public layout
-│   │   │   ├── login.tsx           # /login
-│   │   │   └── register.tsx        # /register
-│   │   └── users/
-│   │       ├── index.tsx           # /users
-│   │       └── $userId.tsx         # /users/:userId
+│   │   └── _public/                # Public routes (layout group)
+│   │       ├── route.tsx           # Public layout
+│   │       ├── index.tsx           # / (home page)
+│   │       ├── login.tsx           # /login
+│   │       ├── register.tsx        # /register
+│   │       └── users/
+│   │           └── index.tsx       # /users (public user list)
 │   ├── components/
-│   │   ├── ui/                     # shadcn/ui components
+│   │   ├── ui/                     # shadcn/ui components (generated)
+│   │   │   ├── alert-dialog.tsx
 │   │   │   ├── button.tsx
-│   │   │   ├── input.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropdown-menu.tsx
 │   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── sheet.tsx
+│   │   │   ├── sidebar.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── table.tsx
+│   │   │   ├── tooltip.tsx
 │   │   │   └── ...
 │   │   ├── forms/                  # Form components
-│   │   │   └── LoginForm.tsx
+│   │   │   ├── LoginForm.tsx
+│   │   │   ├── ProfileForm.tsx
+│   │   │   ├── CreateUserForm.tsx
+│   │   │   └── EditUserForm.tsx
 │   │   ├── layouts/                # Layout components
-│   │   │   ├── RootLayout.tsx
-│   │   │   └── AuthLayout.tsx
+│   │   │   ├── RootLayout.tsx      # Public sidebar layout
+│   │   │   ├── AuthLayout.tsx      # Authenticated sidebar layout
+│   │   │   └── AppSidebar.tsx      # Shared sidebar (public/auth variants)
 │   │   └── features/               # Feature-specific components
+│   │       ├── admin/              # Admin CRUD components
+│   │       │   ├── UserTable.tsx
+│   │       │   ├── CreateUserDialog.tsx
+│   │       │   ├── EditUserDialog.tsx
+│   │       │   └── DeleteUserDialog.tsx
+│   │       ├── theme/
+│   │       │   └── ThemeToggle.tsx  # Light/dark/system dropdown
+│   │       ├── locale/
+│   │       │   └── LocalePicker.tsx # Language switcher dropdown
 │   │       └── dashboard/
 │   ├── hooks/                      # Custom React hooks
-│   │   ├── useAuth.ts
-│   │   └── useMediaQuery.ts
+│   │   ├── use-theme-effect.ts     # Applies theme class to <html>
+│   │   ├── use-locale-effect.ts    # Syncs uiStore locale with i18next
+│   │   └── use-mobile.tsx          # Mobile breakpoint detection
 │   ├── api/                        # API layer
-│   │   ├── client.ts               # Configured fetch/axios instance
+│   │   ├── client.ts               # Configured fetch wrapper with auth headers
 │   │   ├── queries/                # TanStack Query definitions
 │   │   │   ├── users.ts
 │   │   │   └── posts.ts
 │   │   └── mutations/              # TanStack Query mutations
-│   │       └── auth.ts
+│   │       ├── auth.ts
+│   │       └── users.ts
 │   ├── stores/                     # Zustand stores
-│   │   ├── index.ts                # Combined store export
 │   │   ├── authStore.ts
 │   │   └── uiStore.ts
 │   ├── lib/                        # Utilities and configuration
@@ -127,13 +156,14 @@ project-root/
 │   ├── instrument.ts               # Sentry initialization
 │   ├── vite-env.d.ts               # Vite type declarations
 │   ├── main.tsx                    # Application entry point
-│   └── index.css                   # Global styles + Tailwind
+│   └── index.css                   # Global styles + Tailwind + sidebar vars
 ├── e2e/                            # Playwright E2E tests
 │   ├── login.spec.ts
 │   └── dashboard.spec.ts
 ├── .husky/                         # Git hooks
 │   ├── pre-commit
 │   └── commit-msg
+├── .prettierignore                 # Excludes routeTree.gen.ts from Prettier
 ├── vite.config.ts
 ├── playwright.config.ts
 ├── tsconfig.json
@@ -316,6 +346,7 @@ export default defineConfig(({ mode }) => ({
     TanStackRouterVite({
       target: 'react',
       autoCodeSplitting: true,
+      routeFileIgnorePattern: '.test.tsx?$',
     }),
     react(),
     tailwindcss(),
@@ -517,11 +548,13 @@ ReactDOM.createRoot(rootElement).render(
 ```typescript
 // src/routes/__root.tsx
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
-import { QueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { HelmetProvider } from 'react-helmet-async'
 import * as Sentry from '@sentry/react'
+import { useThemeEffect } from '@/hooks/use-theme-effect'
+import { useLocaleEffect } from '@/hooks/use-locale-effect'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -536,10 +569,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 function RootComponent() {
+  useThemeEffect()
+  useLocaleEffect()
+
   return (
     <HelmetProvider>
       <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
-        <div className="min-h-screen bg-background font-sans antialiased">
+        <div className="bg-background min-h-screen font-sans antialiased">
           <Outlet />
         </div>
         {import.meta.env.DEV && (
@@ -645,32 +681,68 @@ function DashboardPage() {
 ### Dynamic Route Parameters
 
 ```typescript
-// src/routes/users/$userId.tsx
+// src/routes/_authenticated/users/$userId.tsx
 import { createFileRoute } from '@tanstack/react-router'
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import { fetchUser } from '@/api/queries/users'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
+import { userQueryOptions, userPostsQueryOptions } from '@/api/queries/users'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-const userQueryOptions = (userId: string) =>
-  queryOptions({
-    queryKey: ['users', userId],
-    queryFn: () => fetchUser(userId),
-  })
-
-export const Route = createFileRoute('/users/$userId')({
+export const Route = createFileRoute('/_authenticated/users/$userId')({
+  // Prefetch user AND posts in parallel
   loader: ({ params, context }) =>
-    context.queryClient.ensureQueryData(userQueryOptions(params.userId)),
+    Promise.all([
+      context.queryClient.ensureQueryData(userQueryOptions(params.userId)),
+      context.queryClient.ensureQueryData(userPostsQueryOptions(params.userId)),
+    ]),
   component: UserPage,
 })
 
 function UserPage() {
   const { userId } = Route.useParams()
+  const { t } = useTranslation('users')
   const { data: user } = useSuspenseQuery(userQueryOptions(userId))
+  const { data: posts } = useSuspenseQuery(userPostsQueryOptions(userId))
 
   return (
-    <div>
-      <h1>{user.name}</h1>
-      <p>{user.email}</p>
-    </div>
+    <>
+      <Helmet>
+        <title>{user.name} | App Name</title>
+      </Helmet>
+      <div className="container py-8">
+        <h1 className="text-3xl font-bold">{user.name}</h1>
+        <p className="text-muted-foreground mt-2">{user.email}</p>
+
+        <section className="mt-8">
+          <h2 className="text-2xl font-semibold">
+            {t('postsHeading', { count: posts.length })}
+          </h2>
+
+          {posts.length === 0 ? (
+            <p className="text-muted-foreground mt-4">{t('noPosts')}</p>
+          ) : (
+            <div className="mt-4 grid gap-4">
+              {posts.map((post) => (
+                <Card key={post.id}>
+                  <CardHeader>
+                    <CardTitle>{post.title}</CardTitle>
+                    <p className="text-muted-foreground text-sm">
+                      {t('publishedOn', {
+                        date: new Date(post.createdAt).toLocaleDateString(),
+                      })}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <p>{post.content}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </>
   )
 }
 ```
@@ -1001,11 +1073,18 @@ export function useDeleteUser() {
 
 ### Layout Components
 
+Both layouts use a collapsible sidebar (shadcn/ui `<Sidebar>`) instead of a top nav bar. The sidebar state is bridged to Zustand's `uiStore` so it persists across page loads. A shared `AppSidebar` renders public or authenticated navigation based on a `navVariant` prop.
+
 ```typescript
 // src/components/layouts/RootLayout.tsx
-import { ReactNode } from 'react'
-import { Link } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useUIStore } from '@/stores/uiStore'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle'
+import { LocalePicker } from '@/components/features/locale/LocalePicker'
+import { AppSidebar } from './AppSidebar'
 
 interface RootLayoutProps {
   children: ReactNode
@@ -1013,41 +1092,44 @@ interface RootLayoutProps {
 
 export function RootLayout({ children }: RootLayoutProps) {
   const { t } = useTranslation('common')
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen)
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen)
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b">
-        <nav className="container flex h-16 items-center gap-6">
-          <Link to="/" className="text-lg font-semibold">
-            {t('appName')}
-          </Link>
-          <Link
-            to="/dashboard"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('navigation.dashboard')}
-          </Link>
-          <Link
-            to="/settings"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {t('navigation.settings')}
-          </Link>
-        </nav>
-      </header>
-      <main>{children}</main>
-    </div>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <AppSidebar navVariant="public" />
+      <div className="flex min-h-svh flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <span className="text-sm font-semibold">{t('appName')}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LocalePicker />
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+    </SidebarProvider>
   )
 }
 ```
 
 ```typescript
 // src/components/layouts/AuthLayout.tsx
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useAuthStore } from '@/stores/authStore'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useUIStore } from '@/stores/uiStore'
 import { Button } from '@/components/ui/button'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle'
+import { LocalePicker } from '@/components/features/locale/LocalePicker'
+import { AppSidebar } from './AppSidebar'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -1058,48 +1140,188 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const navigate = useNavigate()
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen)
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen)
 
   const handleLogout = () => {
     logout()
-    navigate({ to: '/login' })
+    void navigate({ to: '/login' })
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b">
-        <nav className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/dashboard" className="text-lg font-semibold">
-              {t('appName')}
-            </Link>
-            <Link
-              to="/dashboard"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.dashboard')}
-            </Link>
-            <Link
-              to="/settings"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t('navigation.settings')}
-            </Link>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <AppSidebar
+        navVariant="authenticated"
+        user={user}
+        onLogout={handleLogout}
+      />
+      <div className="flex min-h-svh flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <span className="text-sm font-semibold">{t('appName')}</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
+            <LocalePicker />
+            <ThemeToggle />
+            <Link
+              to="/users/$userId"
+              params={{ userId: user?.id ?? '' }}
+              className="text-muted-foreground hover:text-foreground text-sm"
+            >
               {user?.name}
-            </span>
+            </Link>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               {t('navigation.logout')}
             </Button>
           </div>
-        </nav>
-      </header>
-      <main>{children}</main>
-    </div>
+        </header>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+    </SidebarProvider>
   )
 }
 ```
+
+### Sidebar Component
+
+```typescript
+// src/components/layouts/AppSidebar.tsx
+import { Link, useRouterState } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+import {
+  Home,
+  LayoutDashboard,
+  Settings,
+  Users,
+  ShieldCheck,
+  LogOut,
+} from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from '@/components/ui/sidebar'
+import { Button } from '@/components/ui/button'
+
+interface NavItem {
+  label: string     // i18n key under 'common' namespace
+  to: string
+  icon: React.ComponentType<{ className?: string }>
+}
+
+interface AppSidebarProps extends Omit<
+  React.ComponentProps<typeof Sidebar>,
+  'variant'
+> {
+  navVariant: 'public' | 'authenticated'
+  user?: { id: string; name: string } | null
+  onLogout?: () => void
+}
+
+const publicNav: NavItem[] = [
+  { label: 'navigation.home', to: '/', icon: Home },
+  { label: 'navigation.dashboard', to: '/dashboard', icon: LayoutDashboard },
+  { label: 'navigation.settings', to: '/settings', icon: Settings },
+  { label: 'navigation.users', to: '/users', icon: Users },
+]
+
+const authNav: NavItem[] = [
+  { label: 'navigation.dashboard', to: '/dashboard', icon: LayoutDashboard },
+  { label: 'navigation.settings', to: '/settings', icon: Settings },
+  { label: 'navigation.users', to: '/users', icon: Users },
+  { label: 'navigation.admin', to: '/admin/users', icon: ShieldCheck },
+]
+
+export function AppSidebar({
+  navVariant,
+  user,
+  onLogout,
+  ...props
+}: AppSidebarProps) {
+  const { t } = useTranslation('common')
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const items = navVariant === 'public' ? publicNav : authNav
+
+  return (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link to={navVariant === 'public' ? '/' : '/dashboard'}>
+                <span className="text-lg font-semibold">{t('appName')}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>{t('navigation.home')}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton asChild isActive={pathname === item.to}>
+                    <Link to={item.to}>
+                      <item.icon />
+                      <span>{t(item.label)}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {navVariant === 'authenticated' && user && (
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <Link
+                  to="/users/$userId"
+                  params={{ userId: user.id }}
+                  className="truncate text-sm font-medium hover:underline"
+                >
+                  {user.name}
+                </Link>
+                {onLogout && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onLogout}
+                    className="h-7 w-7 shrink-0"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="sr-only">{t('navigation.logout')}</span>
+                  </Button>
+                )}
+              </div>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      )}
+
+      <SidebarRail />
+    </Sidebar>
+  )
+}
+```
+
+> **Sidebar setup:** Install the sidebar component via `pnpm dlx shadcn@latest add sidebar`. This also pulls in `sheet`, `separator`, `tooltip`, and `skeleton` as dependencies. The generated `sidebar.tsx` uses bare CSS variable syntax (`w-[--sidebar-width]`) which is invalid in Tailwind v4 — wrap all occurrences in `var()` (e.g., `w-[var(--sidebar-width)]`). The sidebar CSS variables (`--sidebar`, `--sidebar-foreground`, etc.) must be added to both the `@theme inline` block and the `:root`/`.dark` blocks in `index.css`.
 
 ### Utility Functions
 
@@ -1246,6 +1468,202 @@ export const useUIStore = create<UIStore>()(
 | URL state               | TanStack Router     |
 
 **Important:** Never store server data in Zustand. Use TanStack Query for all API data to avoid sync issues.
+
+### Theme Toggle
+
+The uiStore holds the theme preference (`light` | `dark` | `system`). A `useThemeEffect` hook in the root route applies the `.dark` class to `<html>` and listens for system preference changes when set to `system`.
+
+```typescript
+// src/hooks/use-theme-effect.ts
+import { useEffect } from 'react'
+import { useUIStore } from '@/stores/uiStore'
+
+export function useThemeEffect() {
+  const theme = useUIStore((s) => s.theme)
+
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (theme === 'light') {
+      root.classList.remove('dark')
+      return
+    }
+
+    if (theme === 'dark') {
+      root.classList.add('dark')
+      return
+    }
+
+    // theme === 'system'
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const apply = () => {
+      root.classList.toggle('dark', mql.matches)
+    }
+    apply()
+    mql.addEventListener('change', apply)
+    return () => {
+      mql.removeEventListener('change', apply)
+    }
+  }, [theme])
+}
+```
+
+```typescript
+// src/components/features/theme/ThemeToggle.tsx
+import { Moon, Sun, Monitor } from 'lucide-react'
+import { useUIStore } from '@/stores/uiStore'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+export function ThemeToggle() {
+  const theme = useUIStore((s) => s.theme)
+  const setTheme = useUIStore((s) => s.setTheme)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+          <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={(value) => {
+            setTheme(value as 'light' | 'dark' | 'system')
+          }}
+        >
+          <DropdownMenuRadioItem value="light">
+            <Sun className="mr-2 h-4 w-4" /> Light
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">
+            <Moon className="mr-2 h-4 w-4" /> Dark
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system">
+            <Monitor className="mr-2 h-4 w-4" /> System
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+#### FOUC Prevention
+
+The `useThemeEffect` hook runs after React hydrates, causing a flash of the wrong theme on page load. Prevent this with an inline `<script>` in `index.html` that reads the persisted Zustand state before the first paint:
+
+```html
+<!-- index.html — add inside <head> -->
+<script>
+  ;(function () {
+    try {
+      var stored = JSON.parse(localStorage.getItem('ui-storage') || '{}')
+      var theme = stored.state && stored.state.theme
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else if (theme === 'system' || !theme) {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark')
+        }
+      }
+    } catch (e) {}
+  })()
+</script>
+```
+
+> **Why an inline script?** This script executes synchronously before the browser paints. It reads the same `ui-storage` localStorage key that Zustand persists to, so the initial `.dark` class is applied immediately without waiting for React to mount.
+
+### Locale Switching
+
+Similarly, a `useLocaleEffect` hook in the root route bridges the uiStore `locale` state to `i18n.changeLanguage()`. On mount it adopts i18next's detected language if no persisted preference exists.
+
+```typescript
+// src/hooks/use-locale-effect.ts
+import { useEffect } from 'react'
+import i18n from '@/lib/i18n'
+import { useUIStore } from '@/stores/uiStore'
+
+export function useLocaleEffect() {
+  const locale = useUIStore((s) => s.locale)
+  const setLocale = useUIStore((s) => s.setLocale)
+
+  // On mount: if no persisted preference, adopt i18next's detected language
+  useEffect(() => {
+    if (!localStorage.getItem('ui-storage')) {
+      const detected = i18n.language
+      if (detected && detected !== locale) {
+        setLocale(detected)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    void i18n.changeLanguage(locale)
+    document.documentElement.lang = locale
+  }, [locale])
+}
+```
+
+```typescript
+// src/components/features/locale/LocalePicker.tsx
+import { Globe } from 'lucide-react'
+import { useUIStore } from '@/stores/uiStore'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+const LOCALES = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+] as const
+
+export function LocalePicker() {
+  const locale = useUIStore((s) => s.locale)
+  const setLocale = useUIStore((s) => s.setLocale)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Globe className="h-4 w-4" />
+          <span className="sr-only">Switch language</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          value={locale}
+          onValueChange={(value) => {
+            setLocale(value)
+          }}
+        >
+          {LOCALES.map(({ value, label }) => (
+            <DropdownMenuRadioItem key={value} value={value}>
+              {label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+```
+
+> **Pattern:** Both `useThemeEffect` and `useLocaleEffect` are called in the root route component (`__root.tsx`), not inside layout components. This ensures they run exactly once regardless of which layout is active.
 
 ---
 
@@ -1476,6 +1894,253 @@ function LoginPage() {
 
 > **Pattern:** Prefer `mutate()` with an `onSuccess` callback over `mutateAsync` with `try/catch`. With `mutate()`, TanStack Query automatically populates `mutation.error` on failure, so you can render error UI declaratively via `login.error` without manual state management. The `ApiError` class (from `src/api/client.ts`) carries the HTTP status and parsed response body for structured error messages.
 
+### User Validators
+
+```typescript
+// src/lib/validators/user.ts
+import { z } from 'zod'
+
+export const createUserSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .min(2, { message: 'Name must be at least 2 characters' })
+    .max(50, { message: 'Name must be under 50 characters' }),
+  email: z
+    .email({ error: 'Invalid email address' })
+    .min(1, { message: 'Email is required' }),
+  password: z
+    .string()
+    .min(1, { message: 'Password is required' })
+    .min(8, { message: 'Password must be at least 8 characters' }),
+  role: z.enum(['admin', 'user']).optional(),
+})
+
+export type CreateUserFormData = z.infer<typeof createUserSchema>
+
+export const updateUserSchema = z.object({
+  name: z
+    .string()
+    .min(2, { message: 'Name must be at least 2 characters' })
+    .max(50, { message: 'Name must be under 50 characters' })
+    .optional(),
+  email: z.email({ error: 'Invalid email address' }).optional(),
+  role: z.enum(['admin', 'user']).optional(),
+})
+
+export type UpdateUserFormData = z.infer<typeof updateUserSchema>
+
+export const profileSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .min(2, { message: 'Name must be at least 2 characters' })
+    .max(50, { message: 'Name must be under 50 characters' }),
+  email: z
+    .email({ error: 'Invalid email address' })
+    .min(1, { message: 'Email is required' }),
+})
+
+export type ProfileFormData = z.infer<typeof profileSchema>
+```
+
+### Profile Form
+
+A second form example following the same React Hook Form + Zod + shadcn/ui pattern as LoginForm, but for profile editing with `defaultValues` pre-populated from existing data.
+
+```typescript
+// src/components/forms/ProfileForm.tsx
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { profileSchema, type ProfileFormData } from '@/lib/validators/user'
+
+interface ProfileFormProps {
+  onSubmit: (data: ProfileFormData) => void | Promise<void>
+  isLoading?: boolean
+  defaultValues?: Partial<ProfileFormData>
+}
+
+export function ProfileForm({
+  onSubmit,
+  isLoading,
+  defaultValues,
+}: ProfileFormProps) {
+  const { t } = useTranslation('settings')
+
+  const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: defaultValues?.name ?? '',
+      email: defaultValues?.email ?? '',
+    },
+  })
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('profile.name')}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t('profile.namePlaceholder')}
+                  autoComplete="name"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('profile.email')}</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder={t('profile.emailPlaceholder')}
+                  autoComplete="email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? t('profile.saving') : t('profile.saveChanges')}
+        </Button>
+      </form>
+    </Form>
+  )
+}
+```
+
+### Profile Settings Route
+
+Shows the pattern for editing existing data: pre-populate form defaults from auth store, call a mutation on submit, and update the local auth state on success.
+
+```typescript
+// src/routes/_authenticated/settings/profile.tsx
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { ProfileForm } from '@/components/forms/ProfileForm'
+import { useUpdateUser } from '@/api/mutations/users'
+import { useAuthStore } from '@/stores/authStore'
+import { ApiError } from '@/api/client'
+import type { ProfileFormData } from '@/lib/validators/user'
+
+export const Route = createFileRoute('/_authenticated/settings/profile')({
+  component: ProfileSettingsPage,
+})
+
+function ProfileSettingsPage() {
+  const { t } = useTranslation('settings')
+  const user = useAuthStore((s) => s.user)
+  const updateAuthUser = useAuthStore((s) => s.updateUser)
+  const updateUser = useUpdateUser()
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  const handleSubmit = (data: ProfileFormData) => {
+    if (!user) return
+    setSuccessMessage(null)
+    updateUser.mutate(
+      { id: user.id, ...data },
+      {
+        onSuccess: () => {
+          updateAuthUser(data)
+          setSuccessMessage(t('profile.updateSuccess'))
+        },
+      }
+    )
+  }
+
+  function getErrorMessage(error: Error): string {
+    if (
+      error instanceof ApiError &&
+      error.data != null &&
+      typeof error.data === 'object' &&
+      'message' in error.data
+    ) {
+      return (error.data as { message: string }).message
+    }
+    return t('profile.updateFailed')
+  }
+
+  return (
+    <>
+      <Helmet>
+        <title>{t('profile.pageTitle')} | My Application</title>
+      </Helmet>
+      <div className="container flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>{t('profile.pageTitle')}</CardTitle>
+            <CardDescription>{t('profile.pageDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {updateUser.error && (
+              <div
+                role="alert"
+                className="bg-destructive/10 text-destructive border-destructive/20 mb-4 rounded-md border px-4 py-3 text-sm"
+              >
+                {getErrorMessage(updateUser.error)}
+              </div>
+            )}
+            {successMessage && (
+              <div
+                role="status"
+                className="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200"
+              >
+                {successMessage}
+              </div>
+            )}
+            <ProfileForm
+              onSubmit={handleSubmit}
+              isLoading={updateUser.isPending}
+              defaultValues={{
+                name: user?.name ?? '',
+                email: user?.email ?? '',
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </>
+  )
+}
+```
+
+> **Pattern:** When editing existing data, the form `defaultValues` come from the auth store (or a query). On successful mutation, update both the server cache (via `invalidateQueries` in the mutation hook) and the local auth store (via `updateAuthUser`). Use `useState` for transient success messages since they aren't server state.
+
 ---
 
 ## Internationalization (i18n)
@@ -1489,7 +2154,7 @@ import { initReactI18next } from 'react-i18next'
 import HttpBackend from 'i18next-http-backend'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
-i18n
+void i18n
   .use(HttpBackend)
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -1503,7 +2168,7 @@ i18n
     },
 
     // Namespace configuration
-    ns: ['common', 'auth', 'dashboard', 'validation'],
+    ns: ['common', 'auth', 'dashboard', 'settings', 'users', 'validation'],
     defaultNS: 'common',
 
     // Backend configuration
@@ -1539,6 +2204,8 @@ import 'i18next'
 import type common from '../../public/locales/en/common.json'
 import type auth from '../../public/locales/en/auth.json'
 import type dashboard from '../../public/locales/en/dashboard.json'
+import type settings from '../../public/locales/en/settings.json'
+import type users from '../../public/locales/en/users.json'
 import type validation from '../../public/locales/en/validation.json'
 
 declare module 'i18next' {
@@ -1548,6 +2215,8 @@ declare module 'i18next' {
       common: typeof common
       auth: typeof auth
       dashboard: typeof dashboard
+      settings: typeof settings
+      users: typeof users
       validation: typeof validation
     }
   }
@@ -1564,6 +2233,8 @@ declare module 'i18next' {
     "home": "Home",
     "dashboard": "Dashboard",
     "settings": "Settings",
+    "users": "Users",
+    "admin": "Admin",
     "logout": "Log out"
   },
   "actions": {
@@ -1596,6 +2267,75 @@ declare module 'i18next' {
   "noAccount": "Don't have an account?",
   "hasAccount": "Already have an account?",
   "loginFailed": "Unable to sign in. Please check your credentials and try again."
+}
+```
+
+```json
+// public/locales/en/settings.json
+{
+  "profile": {
+    "pageTitle": "Profile Settings",
+    "pageDescription": "Manage your profile information",
+    "name": "Name",
+    "namePlaceholder": "Enter your name",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateSuccess": "Your profile has been updated.",
+    "updateFailed": "Unable to update profile. Please try again."
+  }
+}
+```
+
+```json
+// public/locales/en/users.json
+{
+  "pageTitle": "{{name}}'s Profile",
+  "postsHeading": "Posts ({{count}})",
+  "noPosts": "No posts yet.",
+  "publishedOn": "Published on {{date}}",
+  "admin": {
+    "pageTitle": "User Management",
+    "createUser": "Create User",
+    "editUser": "Edit User",
+    "deleteUser": "Delete User",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "createdAt": "Created",
+      "actions": "Actions"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Enter name",
+      "email": "Email",
+      "emailPlaceholder": "Enter email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "role": "Role",
+      "rolePlaceholder": "Select a role",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "creating": "Creating...",
+      "saving": "Saving..."
+    },
+    "delete": {
+      "title": "Are you absolutely sure?",
+      "description": "This will permanently delete the user \"{{name}}\". This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting..."
+    },
+    "feedback": {
+      "createSuccess": "User created successfully.",
+      "updateSuccess": "User updated successfully.",
+      "deleteSuccess": "User deleted successfully.",
+      "createFailed": "Failed to create user. Please try again.",
+      "updateFailed": "Failed to update user. Please try again.",
+      "deleteFailed": "Failed to delete user. Please try again."
+    }
+  }
 }
 ```
 
@@ -1764,7 +2504,7 @@ declare module 'vitest' {
 
 ```typescript
 // src/test/test-utils.tsx
-import { type ReactElement, type ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -1780,7 +2520,7 @@ const testI18n = i18n.createInstance()
 void testI18n.use(initReactI18next).init({
   lng: 'en',
   fallbackLng: 'en',
-  ns: ['common', 'auth', 'dashboard', 'validation'],
+  ns: ['common', 'auth', 'dashboard', 'settings', 'users', 'validation'],
   defaultNS: 'common',
   interpolation: { escapeValue: false },
   resources: {
@@ -1791,10 +2531,11 @@ void testI18n.use(initReactI18next).init({
           home: 'Home',
           dashboard: 'Dashboard',
           settings: 'Settings',
+          admin: 'Admin',
           logout: 'Log out',
         },
         actions: { save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', loading: 'Loading...' },
-        errors: { generic: 'Something went wrong.', notFound: 'Page not found', unauthorized: 'Unauthorized' },
+        errors: { generic: 'Something went wrong. Please try again.', notFound: 'Page not found', unauthorized: 'You are not authorized to view this page' },
       },
       auth: {
         signIn: 'Sign In',
@@ -1808,10 +2549,62 @@ void testI18n.use(initReactI18next).init({
         forgotPassword: 'Forgot password?',
         noAccount: "Don't have an account?",
         hasAccount: 'Already have an account?',
-        loginFailed: 'Unable to sign in. Please check your credentials and try again.',
       },
-      dashboard: { pageTitle: 'Dashboard', welcome: 'Welcome back' },
-      validation: {},
+      dashboard: { pageTitle: 'Dashboard', welcome: 'Welcome to your dashboard' },
+      settings: {
+        profile: {
+          pageTitle: 'Profile Settings',
+          pageDescription: 'Manage your profile information',
+          name: 'Name',
+          namePlaceholder: 'Enter your name',
+          email: 'Email',
+          emailPlaceholder: 'Enter your email',
+          saveChanges: 'Save Changes',
+          saving: 'Saving...',
+          updateSuccess: 'Your profile has been updated.',
+          updateFailed: 'Unable to update profile. Please try again.',
+        },
+      },
+      users: {
+        pageTitle: "{{name}}'s Profile",
+        postsHeading: 'Posts ({{count}})',
+        noPosts: 'No posts yet.',
+        publishedOn: 'Published on {{date}}',
+        admin: {
+          pageTitle: 'User Management',
+          createUser: 'Create User',
+          editUser: 'Edit User',
+          deleteUser: 'Delete User',
+          table: { name: 'Name', email: 'Email', role: 'Role', createdAt: 'Created', actions: 'Actions' },
+          form: {
+            name: 'Name', namePlaceholder: 'Enter name',
+            email: 'Email', emailPlaceholder: 'Enter email',
+            password: 'Password', passwordPlaceholder: 'Enter password',
+            role: 'Role', rolePlaceholder: 'Select a role',
+            roleUser: 'User', roleAdmin: 'Admin',
+            creating: 'Creating...', saving: 'Saving...',
+          },
+          delete: {
+            title: 'Are you absolutely sure?',
+            description: 'This will permanently delete the user "{{name}}". This action cannot be undone.',
+            confirm: 'Delete', deleting: 'Deleting...',
+          },
+          feedback: {
+            createSuccess: 'User created successfully.',
+            updateSuccess: 'User updated successfully.',
+            deleteSuccess: 'User deleted successfully.',
+            createFailed: 'Failed to create user. Please try again.',
+            updateFailed: 'Failed to update user. Please try again.',
+            deleteFailed: 'Failed to delete user. Please try again.',
+          },
+        },
+      },
+      validation: {
+        required: 'This field is required',
+        email: 'Please enter a valid email address',
+        minLength: 'Must be at least {{min}} characters',
+        maxLength: 'Must be under {{max}} characters',
+      },
     },
   },
 })
@@ -2723,6 +3516,8 @@ interface ImportMeta {
 | Auth redirects not working    | Use `throw redirect()` in `beforeLoad`, not return                                                                                        |
 | Data not updating             | Always use `useSuspenseQuery` in components, not just loader                                                                              |
 | Deprecated devtools package   | Use `@tanstack/react-router-devtools`, not `@tanstack/router-devtools` (deprecated wrapper)                                               |
+| Route tree regen loop         | Prettier reformats `routeTree.gen.ts` (trailing commas), triggering regeneration. Add `src/routeTree.gen.ts` to `.prettierignore`         |
+| Test files treated as routes  | Add `routeFileIgnorePattern: '.test.tsx?$'` to `TanStackRouterVite` options in `vite.config.ts`                                           |
 
 ### TanStack Query
 
@@ -2735,11 +3530,12 @@ interface ImportMeta {
 
 ### Zustand
 
-| Gotcha                 | Solution                                                       |
-| ---------------------- | -------------------------------------------------------------- |
-| Token storage security | Store access token in memory, refresh token in HttpOnly cookie |
-| Unnecessary re-renders | Use selectors: `useStore((s) => s.value)` not `useStore()`     |
-| Server data in Zustand | Never do this; use TanStack Query for server state             |
+| Gotcha                          | Solution                                                                                                                                                        |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Token storage security          | Store access token in memory, refresh token in HttpOnly cookie                                                                                                  |
+| Unnecessary re-renders          | Use selectors: `useStore((s) => s.value)` not `useStore()`                                                                                                      |
+| Server data in Zustand          | Never do this; use TanStack Query for server state                                                                                                              |
+| Theme flash of unstyled content | Add an inline `<script>` in `index.html` that reads `ui-storage` from localStorage and applies `.dark` class before React mounts. See "FOUC Prevention" section |
 
 ### Zod v4
 
@@ -2760,21 +3556,24 @@ interface ImportMeta {
 
 ### Tailwind v4
 
-| Gotcha                         | Solution                                                          |
-| ------------------------------ | ----------------------------------------------------------------- |
-| No `tailwind.config.ts` needed | Tailwind v4 uses CSS-first config via `@theme` in `index.css`     |
-| `@apply` in component files    | Still works, but prefer utility classes directly in JSX           |
-| Plugin compatibility           | Some v3 plugins aren't compatible; check for v4-specific versions |
+| Gotcha                         | Solution                                                                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| No `tailwind.config.ts` needed | Tailwind v4 uses CSS-first config via `@theme` in `index.css`                                                                  |
+| `@apply` in component files    | Still works, but prefer utility classes directly in JSX                                                                        |
+| Plugin compatibility           | Some v3 plugins aren't compatible; check for v4-specific versions                                                              |
+| Bare CSS vars in classes       | `w-[--sidebar-width]` is invalid in Tailwind v4. Wrap in `var()`: `w-[var(--sidebar-width)]`. Affects shadcn sidebar component |
 
 ### shadcn/ui
 
-| Gotcha                                | Solution                                                                                                 |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Components not styling                | Ensure `@import "tailwindcss"` is in `index.css` and Vite plugin is loaded                               |
-| Path alias issues                     | Must match in both `tsconfig.json` and `vite.config.ts`                                                  |
-| Form validation not showing           | Ensure `<FormMessage />` is inside `<FormField>`                                                         |
-| `shadcn init` is interactive          | Create `components.json`, `index.css`, and `lib/utils.ts` manually, then use `shadcn add`                |
-| ESLint errors in generated components | Add `src/components/ui/**` to ESLint ignores — generated code uses deprecated patterns like `ElementRef` |
+| Gotcha                                | Solution                                                                                                                                                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Components not styling                | Ensure `@import "tailwindcss"` is in `index.css` and Vite plugin is loaded                                                                                                    |
+| Path alias issues                     | Must match in both `tsconfig.json` and `vite.config.ts`                                                                                                                       |
+| Form validation not showing           | Ensure `<FormMessage />` is inside `<FormField>`                                                                                                                              |
+| `shadcn init` is interactive          | Create `components.json`, `index.css`, and `lib/utils.ts` manually, then use `shadcn add`                                                                                     |
+| ESLint errors in generated components | Add `src/components/ui/**` to ESLint ignores — generated code uses deprecated patterns like `ElementRef`                                                                      |
+| Sidebar CSS invalid in Tailwind v4    | Generated `sidebar.tsx` uses `w-[--sidebar-width]` — Tailwind v4 requires `w-[var(--sidebar-width)]`. Fix all bare CSS variable references after running `shadcn add sidebar` |
+| Sidebar needs CSS variables           | Add `--sidebar`, `--sidebar-foreground`, etc. to both the `@theme inline` block and `:root`/`.dark` blocks in `index.css`                                                     |
 
 ### Testing
 
@@ -2790,12 +3589,14 @@ interface ImportMeta {
 
 ### i18n
 
-| Gotcha                       | Solution                                                                                                                               |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Translations not loading     | Check `public/locales/` path and file structure                                                                                        |
-| TypeScript key errors        | Create `i18next.d.ts` with `CustomTypeOptions`                                                                                         |
-| Missing translations in prod | Ensure locales are in `public/` directory                                                                                              |
-| Tests render empty body      | HttpBackend + `useSuspense: true` suspends forever in tests. Create a standalone i18n instance with inline translations for test-utils |
+| Gotcha                       | Solution                                                                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Translations not loading     | Check `public/locales/` path and file structure                                                                                                            |
+| TypeScript key errors        | Create `i18next.d.ts` with `CustomTypeOptions`                                                                                                             |
+| Missing translations in prod | Ensure locales are in `public/` directory                                                                                                                  |
+| Tests render empty body      | HttpBackend + `useSuspense: true` suspends forever in tests. Create a standalone i18n instance with inline translations for test-utils                     |
+| Locale changes not applied   | The i18n config alone doesn't bridge to uiStore. Use a `useLocaleEffect` hook to call `i18n.changeLanguage()` when `uiStore.locale` changes                |
+| New namespaces not loading   | Add each new namespace (e.g., `settings`, `users`) to three places: `i18n.ts` `ns` array, `i18next.d.ts` type declaration, and test-utils inline resources |
 
 ### ESLint
 
