@@ -13,5 +13,5 @@ Tracked feature gaps to implement one at a time.
   - [x] Link dashboard stat cards (Total Users, Total Posts) to relevant pages
 - [x] **Sidebar** — Implement a sidebar component wired to the uiStore sidebar state
 - [x] **Theme toggle** — Expose the uiStore theme (light/dark/system) switcher in the UI; store infrastructure exists but no UI component or DOM application logic yet
-- [ ] **Locale switching** — Add a language picker that uses the uiStore locale + i18next; store and i18n config exist but no UI and locale changes aren't wired to `i18n.changeLanguage()`
-  - [ ] Complete Spanish translations — only `common.json` exists; missing `auth.json`, `dashboard.json`, `settings.json`, `users.json`, and `validation.json`
+- [x] **Locale switching** — Add a language picker that uses the uiStore locale + i18next; store and i18n config exist but no UI and locale changes aren't wired to `i18n.changeLanguage()`
+  - [x] Complete Spanish translations — only `common.json` exists; missing `auth.json`, `dashboard.json`, `settings.json`, `users.json`, and `validation.json`

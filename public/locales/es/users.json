@@ -1,0 +1,47 @@
+{
+  "pageTitle": "Perfil de {{name}}",
+  "postsHeading": "Publicaciones ({{count}})",
+  "noPosts": "Aún no hay publicaciones.",
+  "publishedOn": "Publicado el {{date}}",
+  "admin": {
+    "pageTitle": "Gestión de usuarios",
+    "createUser": "Crear usuario",
+    "editUser": "Editar usuario",
+    "deleteUser": "Eliminar usuario",
+    "table": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "role": "Rol",
+      "createdAt": "Creado",
+      "actions": "Acciones"
+    },
+    "form": {
+      "name": "Nombre",
+      "namePlaceholder": "Ingresa el nombre",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Ingresa el correo electrónico",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Ingresa la contraseña",
+      "role": "Rol",
+      "rolePlaceholder": "Selecciona un rol",
+      "roleUser": "Usuario",
+      "roleAdmin": "Administrador",
+      "creating": "Creando...",
+      "saving": "Guardando..."
+    },
+    "delete": {
+      "title": "¿Estás completamente seguro?",
+      "description": "Esto eliminará permanentemente al usuario \"{{name}}\". Esta acción no se puede deshacer.",
+      "confirm": "Eliminar",
+      "deleting": "Eliminando..."
+    },
+    "feedback": {
+      "createSuccess": "Usuario creado exitosamente.",
+      "updateSuccess": "Usuario actualizado exitosamente.",
+      "deleteSuccess": "Usuario eliminado exitosamente.",
+      "createFailed": "No se pudo crear el usuario. Por favor, inténtalo de nuevo.",
+      "updateFailed": "No se pudo actualizar el usuario. Por favor, inténtalo de nuevo.",
+      "deleteFailed": "No se pudo eliminar el usuario. Por favor, inténtalo de nuevo."
+    }
+  }
+}

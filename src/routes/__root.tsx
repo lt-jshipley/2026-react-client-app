@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { HelmetProvider } from 'react-helmet-async'
 import * as Sentry from '@sentry/react'
 import { useThemeEffect } from '@/hooks/use-theme-effect'
+import { useLocaleEffect } from '@/hooks/use-locale-effect'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -20,6 +21,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   useThemeEffect()
+  useLocaleEffect()
 
   return (
     <HelmetProvider>

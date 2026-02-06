@@ -1,0 +1,14 @@
+{
+  "profile": {
+    "pageTitle": "Configuración del perfil",
+    "pageDescription": "Administra la información de tu perfil",
+    "name": "Nombre",
+    "namePlaceholder": "Ingresa tu nombre",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando...",
+    "updateSuccess": "Tu perfil ha sido actualizado.",
+    "updateFailed": "No se pudo actualizar el perfil. Por favor, inténtalo de nuevo."
+  }
+}
